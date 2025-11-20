@@ -1,24 +1,29 @@
 # Vercel serverless function entry point for Django
-import os
-import sys
-from pathlib import Path
-from io import BytesIO
+# Initialize variables first to ensure they exist
+_wsgi_app_cache = None
+_import_success = True
+_import_error = None
+_import_traceback = None
 
-# Add project root to path - wrap in try/except to avoid crashes
+# Wrap all imports in try/except to ensure handler is always defined
 try:
+    import os
+    import sys
+    from pathlib import Path
+    from io import BytesIO
+    
+    # Add project root to path
     project_root = Path(__file__).parent.parent
     sys.path.insert(0, str(project_root))
-except Exception:
-    pass  # Continue even if path setup fails
-
-# Set Django settings module
-try:
+    
+    # Set Django settings module
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'animal_rescue.settings')
-except Exception:
-    pass  # Continue even if env var setup fails
-
-# Cache for WSGI application (lazy loading)
-_wsgi_app_cache = None
+except Exception as e:
+    # If imports fail, set flags so handler can report the error
+    _import_success = False
+    _import_error = str(e)
+    import traceback
+    _import_traceback = traceback.format_exc()
 
 def get_wsgi_app():
     """Lazy load WSGI application"""
