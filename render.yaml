@@ -12,7 +12,7 @@ services:
       - key: DEBUG
         value: False
       - key: ALLOWED_HOSTS
-        value: *.onrender.com
+        value: *
       - key: PYTHON_VERSION
         value: 3.12.7
 

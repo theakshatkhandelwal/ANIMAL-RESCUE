@@ -21,12 +21,13 @@ DEBUG = config('DEBUG', default=False, cast=bool)
 
 # Allowed hosts for production deployment
 # Handle wildcard and specific domains
-allowed_hosts_str = config('ALLOWED_HOSTS', default='*.onrender.com,localhost,127.0.0.1')
-ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_str.split(',') if h.strip()]
-
-# For Render, also allow the specific domain pattern
-if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['*.onrender.com']:
-    ALLOWED_HOSTS = ['*']  # Allow all hosts for Render (they handle security)
+allowed_hosts_str = config('ALLOWED_HOSTS', default='')
+if allowed_hosts_str:
+    ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_str.split(',') if h.strip()]
+else:
+    # Default: allow all hosts (Render handles security at their level)
+    # For production, set ALLOWED_HOSTS env var with specific domains
+    ALLOWED_HOSTS = ['*']
 
 
 # Application definition
