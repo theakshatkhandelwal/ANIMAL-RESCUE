@@ -17,7 +17,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=False, cast=bool)
+# For Render, set DEBUG=True temporarily to see error details, then change back to False
+DEBUG = config('DEBUG', default=True, cast=bool)  # Set to True to see errors, then False for production
 
 # Allowed hosts for production deployment
 # Handle wildcard and specific domains
