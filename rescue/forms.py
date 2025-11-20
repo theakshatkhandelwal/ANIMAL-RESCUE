@@ -11,8 +11,8 @@ class UserRegistrationForm(UserCreationForm):
     ]
     
     email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={'class': 'form-control'}))
-    first_name = forms.CharField(max_length=30, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    last_name = forms.CharField(max_length=30, required=True, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    first_name = forms.CharField(max_length=30, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    last_name = forms.CharField(max_length=30, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
     user_type = forms.ChoiceField(
         choices=USER_TYPE_CHOICES,
         required=True,
@@ -90,6 +90,12 @@ class UserRegistrationForm(UserCreationForm):
             for field, label in required_fields.items():
                 if not cleaned_data.get(field):
                     self.add_error(field, f'{label} is required for NGO registration.')
+        else:
+            # Validate personal info for regular users
+            if not cleaned_data.get('first_name'):
+                self.add_error('first_name', 'First name is required for user registration.')
+            if not cleaned_data.get('last_name'):
+                self.add_error('last_name', 'Last name is required for user registration.')
         
         return cleaned_data
 

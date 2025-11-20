@@ -46,6 +46,12 @@ def register(request):
                 from geopy.geocoders import Nominatim
                 from geopy.exc import GeocoderTimedOut, GeocoderServiceError
                 
+                # Set first_name and last_name to empty or use shelter name for NGOs
+                if not user.first_name and not user.last_name:
+                    user.first_name = form.cleaned_data.get('shelter_name', '')[:30]
+                    user.last_name = ''
+                    user.save()
+                
                 shelter = Shelter.objects.create(
                     user=user,
                     name=form.cleaned_data['shelter_name'],

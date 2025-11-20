@@ -17,9 +17,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
 
 
 # Application definition
@@ -69,28 +69,55 @@ WSGI_APPLICATION = 'animal_rescue.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-# Try to use MySQL if configured, otherwise fall back to SQLite for development
-USE_MYSQL = config('USE_MYSQL', default=False, cast=bool)
+# Check for PostgreSQL connection string (for production/deployment)
+DATABASE_URL = config('DATABASE_URL', default='')
 
-if USE_MYSQL:
+if DATABASE_URL:
+    # Parse PostgreSQL connection string
+    import urllib.parse as urlparse
+    from urllib.parse import parse_qs
+    
+    url = urlparse.urlparse(DATABASE_URL)
+    
+    # Parse query parameters
+    params = parse_qs(url.query)
+    
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': config('DB_NAME', default='animal_rescue'),
-            'USER': config('DB_USER', default='root'),
-            'PASSWORD': config('DB_PASSWORD', default=''),
-            'HOST': config('DB_HOST', default='localhost'),
-            'PORT': config('DB_PORT', default='3306'),
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': url.path[1:] if url.path.startswith('/') else url.path,  # Remove leading '/'
+            'USER': url.username,
+            'PASSWORD': url.password,
+            'HOST': url.hostname,
+            'PORT': url.port or '5432',
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
         }
     }
 else:
-    # Use SQLite for easier development setup
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+    # Try to use MySQL if configured, otherwise fall back to SQLite for development
+    USE_MYSQL = config('USE_MYSQL', default=False, cast=bool)
+
+    if USE_MYSQL:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.mysql',
+                'NAME': config('DB_NAME', default='animal_rescue'),
+                'USER': config('DB_USER', default='root'),
+                'PASSWORD': config('DB_PASSWORD', default=''),
+                'HOST': config('DB_HOST', default='localhost'),
+                'PORT': config('DB_PORT', default='3306'),
+            }
         }
-    }
+    else:
+        # Use SQLite for easier development setup
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
+            }
+        }
 
 
 # Password validation
@@ -134,6 +161,11 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Media files
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# WhiteNoise for static files serving in production
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

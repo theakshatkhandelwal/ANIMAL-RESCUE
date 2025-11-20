@@ -36,20 +36,22 @@
                 {% endif %}
             </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="{{ form.first_name.id_for_label }}">First Name</label>
-                    {{ form.first_name }}
-                    {% if form.first_name.errors %}
-                        <div class="error">{{ form.first_name.errors }}</div>
-                    {% endif %}
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.last_name.id_for_label }}">Last Name</label>
-                    {{ form.last_name }}
-                    {% if form.last_name.errors %}
-                        <div class="error">{{ form.last_name.errors }}</div>
-                    {% endif %}
+            <div id="personal-info-fields" class="personal-info-section">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.first_name.id_for_label }}">First Name</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                            <div class="error">{{ form.first_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                            <div class="error">{{ form.last_name.errors }}</div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
 
@@ -189,24 +191,43 @@ function togglePassword(fieldId) {
 document.addEventListener('DOMContentLoaded', function() {
     const userTypeRadios = document.querySelectorAll('input[name="user_type"]');
     const ngoFields = document.getElementById('ngo-fields');
-    const ngoRequiredFields = ngoFields.querySelectorAll('input, textarea');
+    const personalInfoFields = document.getElementById('personal-info-fields');
+    const ngoRequiredFields = ngoFields ? ngoFields.querySelectorAll('input, textarea') : [];
     
     function toggleNGOFields() {
         const selectedType = document.querySelector('input[name="user_type"]:checked');
         if (selectedType && selectedType.value === 'ngo') {
-            ngoFields.style.display = 'block';
+            // Show NGO fields, hide personal info
+            if (ngoFields) ngoFields.style.display = 'block';
+            if (personalInfoFields) personalInfoFields.style.display = 'none';
+            
             // Make NGO fields required
             ngoRequiredFields.forEach(field => {
                 if (field.id.includes('shelter_') && !field.id.includes('website')) {
                     field.setAttribute('required', 'required');
                 }
             });
+            
+            // Remove required from personal fields
+            const firstName = document.getElementById('id_first_name');
+            const lastName = document.getElementById('id_last_name');
+            if (firstName) firstName.removeAttribute('required');
+            if (lastName) lastName.removeAttribute('required');
         } else {
-            ngoFields.style.display = 'none';
-            // Remove required attribute
+            // Show personal info, hide NGO fields
+            if (ngoFields) ngoFields.style.display = 'none';
+            if (personalInfoFields) personalInfoFields.style.display = 'block';
+            
+            // Remove required attribute from NGO fields
             ngoRequiredFields.forEach(field => {
                 field.removeAttribute('required');
             });
+            
+            // Make personal fields required
+            const firstName = document.getElementById('id_first_name');
+            const lastName = document.getElementById('id_last_name');
+            if (firstName) firstName.setAttribute('required', 'required');
+            if (lastName) lastName.setAttribute('required', 'required');
         }
     }
     

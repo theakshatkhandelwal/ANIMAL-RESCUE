@@ -2,19 +2,50 @@
 
 {% block content %}
 <div class="hero-section">
-    <div class="container">
-        <h1>Welcome to Animal Rescue & Adoption</h1>
-        <p class="hero-subtitle">Connecting animals in need with loving homes</p>
+    <div class="hero-background"></div>
+    <div class="hero-pattern"></div>
+    <div class="container hero-content">
+        <div class="hero-icon">
+            <i class="fas fa-paw"></i>
+        </div>
+        <h1 class="hero-title">Welcome to Animal Rescue & Adoption</h1>
+        <p class="hero-subtitle">Connecting animals in need with loving homes. Every life matters, every adoption counts.</p>
+        <div class="hero-stats">
+            <div class="stat-item">
+                <i class="fas fa-heart"></i>
+                <span class="stat-number">100+</span>
+                <span class="stat-label">Animals Rescued</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-home"></i>
+                <span class="stat-number">50+</span>
+                <span class="stat-label">Happy Adoptions</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-users"></i>
+                <span class="stat-number">20+</span>
+                <span class="stat-label">Partner Shelters</span>
+            </div>
+        </div>
         <div class="hero-buttons">
-            <a href="{% url 'animal_list' %}" class="btn btn-primary">Find a Pet</a>
-            <a href="{% url 'report_create' %}" class="btn btn-secondary">Report Animal</a>
+            <a href="{% url 'animal_list' %}" class="btn btn-hero-primary">
+                <i class="fas fa-search"></i> Find a Pet
+            </a>
+            <a href="{% url 'report_create' %}" class="btn btn-hero-secondary">
+                <i class="fas fa-exclamation-circle"></i> Report Animal
+            </a>
         </div>
     </div>
 </div>
 
 <div class="container">
     <section class="featured-section">
-        <h2 class="section-title">Available for Adoption</h2>
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-heart"></i> Available for Adoption
+            </h2>
+            <p class="section-subtitle">Meet our furry friends waiting for their forever homes</p>
+        </div>
         <div class="animal-grid">
             {% for animal in featured_animals %}
             <div class="animal-card">
@@ -42,7 +73,12 @@
     </section>
 
     <section class="reports-section">
-        <h2 class="section-title">Recent Reports</h2>
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-map-marker-alt"></i> Recent Reports
+            </h2>
+            <p class="section-subtitle">Help us locate and rescue animals in need</p>
+        </div>
         <div class="report-grid">
             {% for report in recent_reports %}
             <div class="report-card">
@@ -71,27 +107,64 @@
     </section>
 
     <section class="features-section">
-        <h2 class="section-title">How It Works</h2>
+        <div class="section-header">
+            <h2 class="section-title">
+                <i class="fas fa-cogs"></i> How It Works
+            </h2>
+            <p class="section-subtitle">Simple steps to make a difference</p>
+        </div>
         <div class="features-grid">
             <div class="feature-card">
-                <i class="fas fa-search"></i>
+                <div class="feature-icon">
+                    <i class="fas fa-search"></i>
+                </div>
                 <h3>Search & Browse</h3>
-                <p>Browse through available animals and find your perfect companion</p>
+                <p>Browse through available animals and find your perfect companion. Filter by type, breed, and location.</p>
             </div>
             <div class="feature-card">
-                <i class="fas fa-camera"></i>
+                <div class="feature-icon">
+                    <i class="fas fa-camera"></i>
+                </div>
                 <h3>AI Recognition</h3>
-                <p>Upload photos and our AI helps identify animals automatically</p>
+                <p>Upload photos and our advanced AI helps identify animals automatically, making reporting faster and easier.</p>
             </div>
             <div class="feature-card">
-                <i class="fas fa-map-marked-alt"></i>
+                <div class="feature-icon">
+                    <i class="fas fa-map-marked-alt"></i>
+                </div>
                 <h3>Location-Based</h3>
-                <p>Find animals and reports near you with location tracking</p>
+                <p>Find animals and reports near you with real-time location tracking. Connect with nearby shelters instantly.</p>
             </div>
             <div class="feature-card">
-                <i class="fas fa-heart"></i>
+                <div class="feature-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
                 <h3>Adopt & Save</h3>
-                <p>Connect with shelters and give animals a loving home</p>
+                <p>Connect with verified shelters and give animals a loving home. Every adoption saves a life.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section">
+        <div class="cta-content">
+            <h2>Ready to Make a Difference?</h2>
+            <p>Join our community of animal lovers and help us save lives, one animal at a time.</p>
+            <div class="cta-buttons">
+                {% if not user.is_authenticated %}
+                    <a href="{% url 'register' %}" class="btn btn-cta-primary">
+                        <i class="fas fa-user-plus"></i> Get Started
+                    </a>
+                    <a href="{% url 'animal_list' %}" class="btn btn-cta-secondary">
+                        <i class="fas fa-paw"></i> Browse Animals
+                    </a>
+                {% else %}
+                    <a href="{% url 'animal_list' %}" class="btn btn-cta-primary">
+                        <i class="fas fa-paw"></i> Browse Animals
+                    </a>
+                    <a href="{% url 'report_create' %}" class="btn btn-cta-secondary">
+                        <i class="fas fa-plus-circle"></i> Report Animal
+                    </a>
+                {% endif %}
             </div>
         </div>
     </section>
