@@ -87,7 +87,7 @@ Click **"Advanced"** → **"Add Environment Variable"** and add these:
    - Key: `ALLOWED_HOSTS`
    - Value: `*.onrender.com`
 
-5. **PYTHON_VERSION** (optional but recommended)
+5. **PYTHON_VERSION** (IMPORTANT - use 3.12, not 3.13)
    - Key: `PYTHON_VERSION`
    - Value: `3.12.7`
 
