@@ -180,7 +180,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # WhiteNoise for static files serving in production
 if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    # Use CompressedStaticFilesStorage instead of Manifest to avoid missing file errors
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
     MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 # Default primary key field type
