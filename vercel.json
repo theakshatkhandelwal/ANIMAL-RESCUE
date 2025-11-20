@@ -7,6 +7,10 @@
       "config": {
         "maxLambdaSize": "50mb"
       }
+    },
+    {
+      "src": "api/simple.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
