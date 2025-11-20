@@ -17,9 +17,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config('DEBUG', default=True, cast=bool)
+# For Vercel, default to False unless explicitly set
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*').split(',')
+# For Vercel deployment, allow vercel.app domains
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*.vercel.app,localhost,127.0.0.1').split(',')
 
 
 # Application definition

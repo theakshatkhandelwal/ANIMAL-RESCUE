@@ -1,8 +1,18 @@
 from django.urls import path
 from django.contrib.auth import views as auth_views
+from django.http import JsonResponse
 from . import views
 
+def health_check(request):
+    """Simple health check endpoint"""
+    return JsonResponse({
+        'status': 'ok',
+        'django': 'working',
+        'database': 'checking...'
+    })
+
 urlpatterns = [
+    path('health/', health_check, name='health'),
     path('', views.home, name='home'),
     path('register/', views.register, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='rescue/login.html'), name='login'),
