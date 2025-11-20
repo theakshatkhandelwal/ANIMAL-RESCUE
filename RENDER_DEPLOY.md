@@ -60,8 +60,10 @@ Fill in these settings:
 - **Runtime**: `Python 3`
 - **Build Command**: 
   ```
-  pip install -r requirements.txt && python manage.py collectstatic --noinput
+  pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate --noinput
   ```
+  
+  ⚠️ **IMPORTANT**: The `migrate --noinput` part runs migrations automatically during build!
 - **Start Command**: 
   ```
   gunicorn animal_rescue.wsgi:application --bind 0.0.0.0:$PORT
