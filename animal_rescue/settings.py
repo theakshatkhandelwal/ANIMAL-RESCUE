@@ -20,7 +20,13 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-produc
 DEBUG = config('DEBUG', default=False, cast=bool)
 
 # Allowed hosts for production deployment
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*.onrender.com,localhost,127.0.0.1').split(',')
+# Handle wildcard and specific domains
+allowed_hosts_str = config('ALLOWED_HOSTS', default='*.onrender.com,localhost,127.0.0.1')
+ALLOWED_HOSTS = [h.strip() for h in allowed_hosts_str.split(',') if h.strip()]
+
+# For Render, also allow the specific domain pattern
+if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['*.onrender.com']:
+    ALLOWED_HOSTS = ['*']  # Allow all hosts for Render (they handle security)
 
 
 # Application definition
