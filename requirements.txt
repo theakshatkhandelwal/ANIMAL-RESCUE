@@ -6,6 +6,9 @@ psycopg2-binary==2.9.9
 gunicorn==21.2.0
 whitenoise==6.6.0
 
+# Build dependencies for psycopg2
+setuptools>=65.0.0
+
 # Note: For easier deployment, consider using Railway or Render instead of Vercel
 # Vercel is optimized for serverless/Next.js, not traditional Django apps
 
