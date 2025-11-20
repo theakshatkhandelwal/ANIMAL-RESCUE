@@ -23,8 +23,16 @@ from .notification_utils import (
 
 def home(request):
     """Home page with featured animals and recent reports"""
-    featured_animals = Animal.objects.filter(status='available')[:6]
-    recent_reports = Report.objects.filter(status='open')[:6]
+    try:
+        featured_animals = Animal.objects.filter(status='available')[:6]
+        recent_reports = Report.objects.filter(status='open')[:6]
+    except Exception as e:
+        # If database tables don't exist, show empty lists
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Database error in home view: {e}")
+        featured_animals = []
+        recent_reports = []
     
     context = {
         'featured_animals': featured_animals,
