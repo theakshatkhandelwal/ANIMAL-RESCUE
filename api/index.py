@@ -10,15 +10,16 @@ sys.path.insert(0, str(project_root))
 # Set Django settings module
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'animal_rescue.settings')
 
-# Import Django application
+# Import Django
 import django
 django.setup()
 
 from django.core.wsgi import get_wsgi_application
+from django.http import HttpResponse
 
 application = get_wsgi_application()
 
-# Vercel handler
+# Vercel handler function
 def handler(request):
     return application(request)
 
