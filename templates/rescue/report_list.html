@@ -44,7 +44,10 @@
         {% for report in page_obj %}
         <div class="report-card">
             {% if report.photo %}
-                <img src="{{ report.photo.url }}" alt="Report photo">
+                <img src="{{ report.photo.url }}" alt="Report photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="no-image" style="display: none;">
+                    <i class="fas fa-image"></i>
+                </div>
             {% else %}
                 <div class="no-image">
                     <i class="fas fa-image"></i>

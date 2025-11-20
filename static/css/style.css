@@ -760,18 +760,37 @@ body {
 }
 
 /* Password Input Wrapper */
+.password-field-group {
+    width: 100%;
+}
+
 .password-input-wrapper {
     position: relative;
     display: flex;
     align-items: center;
     width: 100%;
+    max-width: 100%;
 }
 
-.password-input-wrapper .form-control {
+.password-input-wrapper .form-control,
+.password-input-wrapper input[type="password"],
+.password-input-wrapper input[type="text"],
+.password-input-wrapper input {
     padding-right: 50px;
-    flex: 1;
-    width: 100%;
-    min-width: 0; /* Prevents flex item from overflowing */
+    flex: 1 1 auto;
+    width: 100% !important;
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Ensure both password fields have same width */
+#id_password1,
+#id_password2 {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    flex: 1 1 auto !important;
 }
 
 .password-toggle {

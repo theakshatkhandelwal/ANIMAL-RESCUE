@@ -7,7 +7,10 @@
     <div class="animal-detail">
         <div class="animal-detail-image">
             {% if animal.photo %}
-                <img src="{{ animal.photo.url }}" alt="{{ animal.name }}">
+                <img src="{{ animal.photo.url }}" alt="{{ animal.name }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="no-image large" style="display: none;">
+                    <i class="fas fa-image"></i>
+                </div>
             {% else %}
                 <div class="no-image large">
                     <i class="fas fa-image"></i>

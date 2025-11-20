@@ -50,7 +50,10 @@
             {% for animal in featured_animals %}
             <div class="animal-card">
                 {% if animal.photo %}
-                    <img src="{{ animal.photo.url }}" alt="{{ animal.name }}">
+                    <img src="{{ animal.photo.url }}" alt="{{ animal.name }}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="no-image" style="display: none;">
+                        <i class="fas fa-image"></i>
+                    </div>
                 {% else %}
                     <div class="no-image">
                         <i class="fas fa-image"></i>
@@ -83,7 +86,10 @@
             {% for report in recent_reports %}
             <div class="report-card">
                 {% if report.photo %}
-                    <img src="{{ report.photo.url }}" alt="Report photo">
+                    <img src="{{ report.photo.url }}" alt="Report photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                    <div class="no-image" style="display: none;">
+                        <i class="fas fa-image"></i>
+                    </div>
                 {% else %}
                     <div class="no-image">
                         <i class="fas fa-image"></i>

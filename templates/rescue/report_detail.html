@@ -7,7 +7,10 @@
     <div class="report-detail">
         <div class="report-detail-image">
             {% if report.photo %}
-                <img src="{{ report.photo.url }}" alt="Report photo">
+                <img src="{{ report.photo.url }}" alt="Report photo" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="no-image large" style="display: none;">
+                    <i class="fas fa-image"></i>
+                </div>
             {% else %}
                 <div class="no-image large">
                     <i class="fas fa-image"></i>
