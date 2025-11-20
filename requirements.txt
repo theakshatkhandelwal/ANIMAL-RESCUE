@@ -1,6 +1,5 @@
 Django==4.2.7
 Pillow==10.1.0
-tensorflow>=2.16.0
 opencv-python>=4.8.0
 numpy>=1.24.0
 geopy==2.4.1
@@ -8,5 +7,9 @@ python-decouple==3.8
 psycopg2-binary==2.9.9
 gunicorn==21.2.0
 whitenoise==6.6.0
+
+# Optional: TensorFlow for ML model support (commented out for Vercel deployment due to size)
+# tensorflow>=2.16.0
+# To enable: uncomment above and update ai_recognition.py to use actual model
 
 

@@ -1,13 +1,22 @@
 """
 AI Image Recognition Module for Animal Identification
-Uses TensorFlow and OpenCV for basic animal classification
+Uses OpenCV for basic animal classification
+TensorFlow is optional and can be added later for ML model support
 """
 import cv2
 import numpy as np
-from tensorflow import keras
-from tensorflow.keras.preprocessing import image
 import os
 from PIL import Image
+
+# Optional TensorFlow import (for future ML model support)
+try:
+    from tensorflow import keras
+    from tensorflow.keras.preprocessing import image
+    TENSORFLOW_AVAILABLE = True
+except ImportError:
+    TENSORFLOW_AVAILABLE = False
+    keras = None
+    image = None
 
 
 class AnimalRecognizer:
@@ -41,7 +50,8 @@ class AnimalRecognizer:
             img = Image.open(image_path)
             img = img.convert('RGB')
             img = img.resize((224, 224))
-            img_array = image.img_to_array(img)
+            # Use numpy instead of tensorflow.keras.preprocessing
+            img_array = np.array(img)
             img_array = np.expand_dims(img_array, axis=0)
             img_array = img_array / 255.0
             return img_array
