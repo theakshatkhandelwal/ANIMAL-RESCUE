@@ -64,8 +64,15 @@ Fill in these settings:
   ```
 - **Start Command**: 
   ```
-  gunicorn animal_rescue.wsgi:application
+  gunicorn animal_rescue.wsgi:application --bind 0.0.0.0:$PORT
   ```
+  
+  ⚠️ **CRITICAL**: Make sure the start command is EXACTLY:
+  ```
+  gunicorn animal_rescue.wsgi:application --bind 0.0.0.0:$PORT
+  ```
+  
+  **NOT** `gunicorn app:app` (this is wrong!)
 
 ### Environment Variables:
 Click **"Advanced"** → **"Add Environment Variable"** and add these:
