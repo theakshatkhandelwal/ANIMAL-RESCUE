@@ -84,10 +84,13 @@ if DATABASE_URL:
     # Parse query parameters
     params = parse_qs(url.query)
     
+    # Extract database name (remove leading '/' if present)
+    db_name = url.path[1:] if url.path.startswith('/') else url.path
+    
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': url.path[1:] if url.path.startswith('/') else url.path,  # Remove leading '/'
+            'NAME': db_name,
             'USER': url.username,
             'PASSWORD': url.password,
             'HOST': url.hostname,
@@ -95,6 +98,8 @@ if DATABASE_URL:
             'OPTIONS': {
                 'sslmode': 'require',
             },
+            # Connection settings for Neon
+            'CONN_MAX_AGE': 600,  # Keep connections alive for 10 minutes
         }
     }
 else:
