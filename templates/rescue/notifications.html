@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications - Animal Rescue{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <h1>Notifications</h1>
+                {% if unread_count > 0 %}
+                    <p>{{ unread_count }} unread notification{{ unread_count|pluralize }}</p>
+                {% else %}
+                    <p>All caught up!</p>
+                {% endif %}
+            </div>
+            <div>
+                {% if unread_count > 0 %}
+                    <a href="{% url 'notification_mark_all_read' %}" class="btn btn-primary">Mark All as Read</a>
+                {% endif %}
+                <a href="{% url 'dashboard' %}" class="btn btn-outline">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="notifications-list">
+        {% for notification in notifications %}
+        <div class="notification-card {% if not notification.is_read %}unread{% endif %}">
+            <div class="notification-header">
+                <div>
+                    <h3>{{ notification.title }}</h3>
+                    <span class="notification-type badge badge-primary">{{ notification.get_notification_type_display }}</span>
+                </div>
+                <div class="notification-meta">
+                    <span class="notification-time">{{ notification.created_at|date:"M d, Y h:i A" }}</span>
+                    {% if not notification.is_read %}
+                        <a href="{% url 'notification_mark_read' notification.pk %}" class="btn btn-sm btn-outline">Mark Read</a>
+                    {% else %}
+                        <span class="badge badge-secondary">Read</span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="notification-message">
+                <p>{{ notification.message|linebreaks }}</p>
+            </div>
+            <div class="notification-actions">
+                {% if notification.report %}
+                    <a href="{% url 'report_detail' notification.report.pk %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-eye"></i> View Report
+                    </a>
+                    <a href="{% url 'update_create_report' notification.report.pk %}" class="btn btn-sm btn-outline">
+                        <i class="fas fa-edit"></i> Add Update
+                    </a>
+                {% elif notification.adoption_request %}
+                    <a href="{% url 'adoption_request_manage' notification.adoption_request.pk %}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-hand-holding-heart"></i> Manage Request
+                    </a>
+                    <a href="{% url 'animal_detail' notification.adoption_request.animal.pk %}" class="btn btn-sm btn-outline">
+                        <i class="fas fa-paw"></i> View Animal
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-results">
+            <i class="fas fa-bell-slash"></i>
+            <p>No notifications yet.</p>
+            <p>You'll receive notifications when:</p>
+            <ul style="text-align: left; display: inline-block;">
+                <li>New animal reports are submitted near your shelter</li>
+                <li>Users submit adoption requests for your animals</li>
+                <li>Updates are posted on reports you're following</li>
+            </ul>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+

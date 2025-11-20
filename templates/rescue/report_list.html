@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Animal Reports - Animal Rescue{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Animal Reports</h1>
+        <p>Browse reports of stray, lost, or found animals</p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'report_create' %}" class="btn btn-primary">Report Animal</a>
+        {% endif %}
+    </div>
+
+    <div class="filters-section">
+        <form method="get" class="filter-form">
+            <div class="filter-group">
+                <select name="type" class="form-control">
+                    <option value="">All Report Types</option>
+                    <option value="stray" {% if report_type == 'stray' %}selected{% endif %}>Stray Animal</option>
+                    <option value="lost" {% if report_type == 'lost' %}selected{% endif %}>Lost Pet</option>
+                    <option value="found" {% if report_type == 'found' %}selected{% endif %}>Found Animal</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <select name="animal_type" class="form-control">
+                    <option value="">All Animal Types</option>
+                    <option value="dog" {% if animal_type == 'dog' %}selected{% endif %}>Dog</option>
+                    <option value="cat" {% if animal_type == 'cat' %}selected{% endif %}>Cat</option>
+                    <option value="bird" {% if animal_type == 'bird' %}selected{% endif %}>Bird</option>
+                    <option value="rabbit" {% if animal_type == 'rabbit' %}selected{% endif %}>Rabbit</option>
+                    <option value="other" {% if animal_type == 'other' %}selected{% endif %}>Other</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <input type="text" name="city" placeholder="City" value="{{ city }}" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="{% url 'report_list' %}" class="btn btn-outline">Clear</a>
+        </form>
+    </div>
+
+    <div class="report-grid">
+        {% for report in page_obj %}
+        <div class="report-card">
+            {% if report.photo %}
+                <img src="{{ report.photo.url }}" alt="Report photo">
+            {% else %}
+                <div class="no-image">
+                    <i class="fas fa-image"></i>
+                </div>
+            {% endif %}
+            <div class="report-card-content">
+                <span class="badge badge-{{ report.report_type }}">{{ report.get_report_type_display }}</span>
+                <h3>{{ report.get_animal_type_display }}</h3>
+                <p class="report-description">{{ report.description|truncatewords:20 }}</p>
+                <p><i class="fas fa-map-marker-alt"></i> {{ report.location }}, {{ report.city }}, {{ report.state }}</p>
+                {% if report.ai_identified_type %}
+                    <p class="ai-info">
+                        <i class="fas fa-robot"></i> AI identified: {{ report.ai_identified_type }}
+                        {% if report.ai_confidence %}
+                            ({{ report.ai_confidence|floatformat:0 }}% confidence)
+                        {% endif %}
+                    </p>
+                {% endif %}
+                <p class="report-date">{{ report.created_at|date:"M d, Y" }}</p>
+                <a href="{% url 'report_detail' report.pk %}" class="btn btn-sm">View Details</a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-results">
+            <i class="fas fa-search"></i>
+            <p>No reports found matching your criteria.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if report_type %}&type={{ report_type }}{% endif %}{% if animal_type %}&animal_type={{ animal_type }}{% endif %}{% if city %}&city={{ city }}{% endif %}" class="btn">Previous</a>
+        {% endif %}
+        <span class="page-info">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if report_type %}&type={{ report_type }}{% endif %}{% if animal_type %}&animal_type={{ animal_type }}{% endif %}{% if city %}&city={{ city }}{% endif %}" class="btn">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+

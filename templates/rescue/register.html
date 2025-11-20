@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - Animal Rescue{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <h1>Register</h1>
+        <form method="post" class="form">
+            {% csrf_token %}
+            
+            <!-- User Type Selection -->
+            <div class="form-group user-type-selection">
+                <label>{{ form.user_type.label }}</label>
+                <div class="user-type-options">
+                    {% for choice in form.user_type %}
+                        <div class="user-type-option">
+                            {{ choice.tag }}
+                            <label for="{{ choice.id_for_label }}" class="user-type-label">
+                                <i class="fas {% if choice.choice_value == 'user' %}fa-user{% else %}fa-building{% endif %}"></i>
+                                {{ choice.choice_label }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+                {% if form.user_type.errors %}
+                    <div class="error">{{ form.user_type.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="error">{{ form.username.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">First Name</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="error">{{ form.first_name.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">Last Name</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="error">{{ form.last_name.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="error">{{ form.email.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password1.id_for_label }}">Password</label>
+                <div class="password-input-wrapper">
+                    {{ form.password1 }}
+                    <button type="button" class="password-toggle" onclick="togglePassword('id_password1')">
+                        <i class="fas fa-eye" id="eye-icon-1"></i>
+                    </button>
+                </div>
+                {% if form.password1.errors %}
+                    <div class="error">{{ form.password1.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password2.id_for_label }}">Confirm Password</label>
+                <div class="password-input-wrapper">
+                    {{ form.password2 }}
+                    <button type="button" class="password-toggle" onclick="togglePassword('id_password2')">
+                        <i class="fas fa-eye" id="eye-icon-2"></i>
+                    </button>
+                </div>
+                {% if form.password2.errors %}
+                    <div class="error">{{ form.password2.errors }}</div>
+                {% endif %}
+            </div>
+
+            <!-- NGO/Shelter Fields (shown conditionally) -->
+            <div id="ngo-fields" class="ngo-fields-section" style="display: none;">
+                <h3 style="margin: 2rem 0 1rem; color: var(--primary-color); border-bottom: 2px solid var(--primary-color); padding-bottom: 0.5rem;">
+                    <i class="fas fa-building"></i> Shelter/NGO Information
+                </h3>
+                
+                <div class="form-group">
+                    <label for="{{ form.shelter_name.id_for_label }}">{{ form.shelter_name.label }} <span class="required">*</span></label>
+                    {{ form.shelter_name }}
+                    {% if form.shelter_name.errors %}
+                        <div class="error">{{ form.shelter_name.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.shelter_address.id_for_label }}">{{ form.shelter_address.label }} <span class="required">*</span></label>
+                    {{ form.shelter_address }}
+                    {% if form.shelter_address.errors %}
+                        <div class="error">{{ form.shelter_address.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.shelter_city.id_for_label }}">{{ form.shelter_city.label }} <span class="required">*</span></label>
+                        {{ form.shelter_city }}
+                        {% if form.shelter_city.errors %}
+                            <div class="error">{{ form.shelter_city.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.shelter_state.id_for_label }}">{{ form.shelter_state.label }} <span class="required">*</span></label>
+                        {{ form.shelter_state }}
+                        {% if form.shelter_state.errors %}
+                            <div class="error">{{ form.shelter_state.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.shelter_zip_code.id_for_label }}">{{ form.shelter_zip_code.label }} <span class="required">*</span></label>
+                        <div class="input-with-button">
+                            {{ form.shelter_zip_code }}
+                            <button type="button" id="fetchLocationBtnReg" class="btn btn-sm btn-secondary">
+                                <i class="fas fa-map-marker-alt"></i> Fetch Location
+                            </button>
+                        </div>
+                        {% if form.shelter_zip_code.errors %}
+                            <div class="error">{{ form.shelter_zip_code.errors }}</div>
+                        {% endif %}
+                        <small id="locationStatusReg"></small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="{{ form.shelter_phone.id_for_label }}">{{ form.shelter_phone.label }} <span class="required">*</span></label>
+                        {{ form.shelter_phone }}
+                        {% if form.shelter_phone.errors %}
+                            <div class="error">{{ form.shelter_phone.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        <label for="{{ form.shelter_website.id_for_label }}">{{ form.shelter_website.label }}</label>
+                        {{ form.shelter_website }}
+                        {% if form.shelter_website.errors %}
+                            <div class="error">{{ form.shelter_website.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Register</button>
+                <p>Already have an account? <a href="{% url 'login' %}">Login here</a></p>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Password visibility toggle
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    const iconId = fieldId === 'id_password1' ? 'eye-icon-1' : 'eye-icon-2';
+    const icon = document.getElementById(iconId);
+    
+    if (field.type === 'password') {
+        field.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        field.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+// NGO fields toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const userTypeRadios = document.querySelectorAll('input[name="user_type"]');
+    const ngoFields = document.getElementById('ngo-fields');
+    const ngoRequiredFields = ngoFields.querySelectorAll('input, textarea');
+    
+    function toggleNGOFields() {
+        const selectedType = document.querySelector('input[name="user_type"]:checked');
+        if (selectedType && selectedType.value === 'ngo') {
+            ngoFields.style.display = 'block';
+            // Make NGO fields required
+            ngoRequiredFields.forEach(field => {
+                if (field.id.includes('shelter_') && !field.id.includes('website')) {
+                    field.setAttribute('required', 'required');
+                }
+            });
+        } else {
+            ngoFields.style.display = 'none';
+            // Remove required attribute
+            ngoRequiredFields.forEach(field => {
+                field.removeAttribute('required');
+            });
+        }
+    }
+    
+    // Add event listeners to radio buttons
+    userTypeRadios.forEach(radio => {
+        radio.addEventListener('change', toggleNGOFields);
+    });
+    
+    // Check on page load
+    toggleNGOFields();
+
+    // Fetch Location functionality for registration
+    const fetchLocationBtn = document.getElementById('fetchLocationBtnReg');
+    if (fetchLocationBtn) {
+        fetchLocationBtn.addEventListener('click', function() {
+            const statusEl = document.getElementById('locationStatusReg');
+            const btn = this;
+            
+            if (!navigator.geolocation) {
+                statusEl.textContent = 'Geolocation is not supported by your browser';
+                statusEl.style.color = 'var(--danger-color)';
+                return;
+            }
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching...';
+            statusEl.textContent = 'Getting your location...';
+            statusEl.style.color = 'var(--primary-color)';
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    
+                    // Use reverse geocoding API
+                    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const address = data.address || {};
+                            
+                            // Fill location fields
+                            document.getElementById('id_shelter_address').value = 
+                                [address.road, address.house_number].filter(Boolean).join(' ') || 
+                                address.suburb || 
+                                address.neighbourhood || 
+                                '';
+                            
+                            document.getElementById('id_shelter_city').value = 
+                                address.city || 
+                                address.town || 
+                                address.village || 
+                                address.municipality || 
+                                '';
+                            
+                            document.getElementById('id_shelter_state').value = 
+                                address.state || 
+                                address.region || 
+                                '';
+                            
+                            document.getElementById('id_shelter_zip_code').value = 
+                                address.postcode || 
+                                '';
+                            
+                            statusEl.textContent = 'Location fetched successfully!';
+                            statusEl.style.color = 'var(--secondary-color)';
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Fetch Location';
+                        })
+                        .catch(error => {
+                            console.error('Geocoding error:', error);
+                            statusEl.textContent = 'Error fetching address. Please enter manually.';
+                            statusEl.style.color = 'var(--danger-color)';
+                            btn.disabled = false;
+                            btn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Fetch Location';
+                        });
+                },
+                function(error) {
+                    let errorMsg = 'Error getting location: ';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg += 'Permission denied. Please enable location access.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg += 'Location unavailable.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg += 'Request timeout.';
+                            break;
+                        default:
+                            errorMsg += 'Unknown error.';
+                            break;
+                    }
+                    statusEl.textContent = errorMsg;
+                    statusEl.style.color = 'var(--danger-color)';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Fetch Location';
+                }
+            );
+        });
+    }
+});
+</script>
+{% endblock %}
+
+

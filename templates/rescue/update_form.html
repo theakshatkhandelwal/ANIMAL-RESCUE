@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Update - Animal Rescue{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <h1>Add Update</h1>
+        {% if animal %}
+            <p>Adding update for: <strong>{{ animal.name }}</strong></p>
+        {% elif report %}
+            <p>Adding update for report at: <strong>{{ report.location }}</strong></p>
+        {% endif %}
+        <form method="post" class="form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">Title</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                    <div class="error">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.content.id_for_label }}">Content</label>
+                {{ form.content }}
+                {% if form.content.errors %}
+                    <div class="error">{{ form.content.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Post Update</button>
+                {% if animal %}
+                    <a href="{% url 'animal_detail' animal.pk %}" class="btn btn-outline">Cancel</a>
+                {% elif report %}
+                    <a href="{% url 'report_detail' report.pk %}" class="btn btn-outline">Cancel</a>
+                {% else %}
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+

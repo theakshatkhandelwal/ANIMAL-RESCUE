@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Adoption Request - Animal Rescue{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <h1>Manage Adoption Request</h1>
+        <div class="request-details">
+            <h2>{{ adoption_request.animal.name }}</h2>
+            <p><strong>Requested by:</strong> {{ adoption_request.user.get_full_name|default:adoption_request.user.username }}</p>
+            <p><strong>Email:</strong> {{ adoption_request.user.email }}</p>
+            <p><strong>Current Status:</strong> <span class="badge badge-{{ adoption_request.status }}">{{ adoption_request.get_status_display }}</span></p>
+            <div class="message-box">
+                <h3>Message from Applicant:</h3>
+                <p>{{ adoption_request.message }}</p>
+            </div>
+        </div>
+
+        {% if adoption_request.status == 'pending' %}
+        <form method="post" class="form">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button type="submit" name="action" value="approve" class="btn btn-success">Approve Request</button>
+                <button type="submit" name="action" value="reject" class="btn btn-danger">Reject Request</button>
+                <a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+        {% else %}
+        <div class="alert alert-info">
+            This request has already been {{ adoption_request.get_status_display }}.
+        </div>
+        <a href="{% url 'dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+

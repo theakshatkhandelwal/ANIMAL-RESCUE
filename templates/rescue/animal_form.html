@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Animal Rescue{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <h1>{{ title|default:"Add Animal" }}</h1>
+        <form method="post" enctype="multipart/form-data" class="form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.name.id_for_label }}">Name</label>
+                {{ form.name }}
+                {% if form.name.errors %}
+                    <div class="error">{{ form.name.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.animal_type.id_for_label }}">Animal Type</label>
+                    {{ form.animal_type }}
+                    {% if form.animal_type.errors %}
+                        <div class="error">{{ form.animal_type.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.breed.id_for_label }}">Breed</label>
+                    {{ form.breed }}
+                    <div id="breedSuggestions" class="breed-suggestions" style="display: none;"></div>
+                    {% if form.breed.errors %}
+                        <div class="error">{{ form.breed.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.age.id_for_label }}">Age (years)</label>
+                    {{ form.age }}
+                    {% if form.age.errors %}
+                        <div class="error">{{ form.age.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.gender.id_for_label }}">Gender</label>
+                    {{ form.gender }}
+                    {% if form.gender.errors %}
+                        <div class="error">{{ form.gender.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.size.id_for_label }}">Size</label>
+                    {{ form.size }}
+                    {% if form.size.errors %}
+                        <div class="error">{{ form.size.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.color.id_for_label }}">Color</label>
+                {{ form.color }}
+                {% if form.color.errors %}
+                    <div class="error">{{ form.color.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="error">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.photo.id_for_label }}">Photo</label>
+                <div class="photo-upload-container">
+                    <div class="file-input-wrapper">
+                        {{ form.photo }}
+                        <button type="button" id="cameraBtn" class="btn btn-sm btn-secondary camera-btn">
+                            <i class="fas fa-camera"></i> Camera
+                        </button>
+                    </div>
+                    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+                </div>
+                {% if form.photo.errors %}
+                    <div class="error">{{ form.photo.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.status.id_for_label }}">Status</label>
+                {{ form.status }}
+                {% if form.status.errors %}
+                    <div class="error">{{ form.status.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save</button>
+                {% if animal %}
+                    <a href="{% url 'animal_detail' animal.pk %}" class="btn btn-outline">Cancel</a>
+                {% else %}
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline">Cancel</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Breed suggestions based on animal type
+const breedData = {
+    'dog': ['Labrador Retriever', 'German Shepherd', 'Golden Retriever', 'French Bulldog', 'Bulldog', 'Poodle', 'Beagle', 'Rottweiler', 'Yorkshire Terrier', 'Dachshund', 'Siberian Husky', 'Boxer', 'Great Dane', 'Doberman Pinscher', 'Australian Shepherd', 'Shih Tzu', 'Boston Terrier', 'Pomeranian', 'Havanese', 'Maltese', 'Mixed Breed', 'Other'],
+    'cat': ['Persian', 'Maine Coon', 'British Shorthair', 'Ragdoll', 'Bengal', 'Abyssinian', 'American Shorthair', 'Siamese', 'Scottish Fold', 'Sphynx', 'Russian Blue', 'Norwegian Forest Cat', 'Turkish Angora', 'Exotic Shorthair', 'Birman', 'Oriental Shorthair', 'Devon Rex', 'Himalayan', 'Mixed Breed', 'Other'],
+    'bird': ['Parakeet', 'Cockatiel', 'Canary', 'Lovebird', 'Finch', 'Cockatoo', 'African Grey', 'Macaw', 'Conure', 'Budgerigar', 'Other'],
+    'rabbit': ['Holland Lop', 'Mini Rex', 'Lionhead', 'Netherland Dwarf', 'Flemish Giant', 'Angora', 'Californian', 'New Zealand', 'Rex', 'Other'],
+    'other': ['Mixed Breed', 'Other']
+};
+
+const animalTypeSelect = document.getElementById('id_animal_type');
+const breedInput = document.getElementById('id_breed');
+const breedSuggestions = document.getElementById('breedSuggestions');
+
+if (animalTypeSelect && breedInput && breedSuggestions) {
+    animalTypeSelect.addEventListener('change', function() {
+        const selectedType = this.value;
+        const breeds = breedData[selectedType] || [];
+        
+        if (breeds.length > 0) {
+            breedSuggestions.innerHTML = '';
+            breedSuggestions.style.display = 'block';
+            
+            breeds.forEach(breed => {
+                const suggestion = document.createElement('span');
+                suggestion.className = 'breed-suggestion-tag';
+                suggestion.textContent = breed;
+                suggestion.addEventListener('click', function() {
+                    breedInput.value = breed;
+                    breedSuggestions.style.display = 'none';
+                });
+                breedSuggestions.appendChild(suggestion);
+            });
+        } else {
+            breedSuggestions.style.display = 'none';
+        }
+    });
+
+    // Close suggestions when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!breedSuggestions.contains(e.target) && e.target !== breedInput && e.target !== animalTypeSelect) {
+            breedSuggestions.style.display = 'none';
+        }
+    });
+}
+
+// Camera functionality
+document.getElementById('cameraBtn').addEventListener('click', function() {
+    document.getElementById('cameraInput').click();
+});
+
+document.getElementById('cameraInput').addEventListener('change', function(e) {
+    if (e.target.files && e.target.files[0]) {
+        // Transfer the file to the main photo input
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(e.target.files[0]);
+        document.getElementById('id_photo').files = dataTransfer.files;
+        
+        // Trigger change event to show preview
+        const event = new Event('change', { bubbles: true });
+        document.getElementById('id_photo').dispatchEvent(event);
+    }
+});
+</script>
+{% endblock %}
+
+

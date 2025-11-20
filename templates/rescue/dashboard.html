@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Animal Rescue{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="dashboard-header">
+        <h1>Dashboard</h1>
+        {% if not is_shelter %}
+            <a href="{% url 'shelter_create' %}" class="btn btn-primary">Create Shelter Profile</a>
+        {% endif %}
+    </div>
+
+    {% if is_shelter %}
+    <div class="dashboard-sections">
+        <section class="dashboard-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h2>Notifications</h2>
+                <div>
+                    {% if unread_count > 0 %}
+                        <span class="badge badge-primary" style="margin-right: 1rem;">{{ unread_count }} Unread</span>
+                    {% endif %}
+                    <a href="{% url 'notifications' %}" class="btn btn-sm">View All</a>
+                    {% if unread_count > 0 %}
+                        <a href="{% url 'notification_mark_all_read' %}" class="btn btn-sm btn-outline">Mark All Read</a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="notifications-preview">
+                {% for notification in notifications %}
+                <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                    <div class="notification-header">
+                        <h4>{{ notification.title }}</h4>
+                        <span class="notification-time">{{ notification.created_at|timesince }} ago</span>
+                    </div>
+                    <p>{{ notification.message|truncatewords:30 }}</p>
+                    {% if notification.report %}
+                        <a href="{% url 'report_detail' notification.report.pk %}" class="btn btn-sm">View Report</a>
+                    {% elif notification.adoption_request %}
+                        <a href="{% url 'adoption_request_manage' notification.adoption_request.pk %}" class="btn btn-sm">View Request</a>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p>No notifications yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="dashboard-section">
+            <h2>My Animals</h2>
+            <a href="{% url 'animal_create' %}" class="btn btn-primary">Add New Animal</a>
+            <div class="animal-grid">
+                {% for animal in animals %}
+                <div class="animal-card">
+                    {% if animal.photo %}
+                        <img src="{{ animal.photo.url }}" alt="{{ animal.name }}">
+                    {% else %}
+                        <div class="no-image">
+                            <i class="fas fa-image"></i>
+                        </div>
+                    {% endif %}
+                    <div class="animal-card-content">
+                        <h3>{{ animal.name }}</h3>
+                        <span class="badge badge-{{ animal.status }}">{{ animal.get_status_display }}</span>
+                        <a href="{% url 'animal_detail' animal.pk %}" class="btn btn-sm">View</a>
+                        <a href="{% url 'animal_edit' animal.pk %}" class="btn btn-sm btn-outline">Edit</a>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No animals yet. <a href="{% url 'animal_create' %}">Add your first animal</a></p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="dashboard-section">
+            <h2>Adoption Requests</h2>
+            <div class="adoption-requests">
+                {% for request in adoption_requests %}
+                <div class="request-card">
+                    <h3>{{ request.animal.name }}</h3>
+                    <p><strong>Requested by:</strong> {{ request.user.get_full_name|default:request.user.username }}</p>
+                    <p><strong>Status:</strong> <span class="badge badge-{{ request.status }}">{{ request.get_status_display }}</span></p>
+                    <p>{{ request.message|truncatewords:30 }}</p>
+                    {% if request.status == 'pending' %}
+                        <a href="{% url 'adoption_request_manage' request.pk %}" class="btn btn-sm">Manage Request</a>
+                    {% endif %}
+                </div>
+                {% empty %}
+                <p>No adoption requests at the moment.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+    {% else %}
+    <div class="dashboard-sections">
+        <section class="dashboard-section">
+            <h2>My Reports</h2>
+            <a href="{% url 'report_create' %}" class="btn btn-primary">Create New Report</a>
+            <div class="report-list">
+                {% for report in user_reports %}
+                <div class="report-item">
+                    <h3>{{ report.get_report_type_display }} - {{ report.get_animal_type_display }}</h3>
+                    <p>{{ report.location }}, {{ report.city }}</p>
+                    <span class="badge badge-{{ report.status }}">{{ report.get_status_display }}</span>
+                    <a href="{% url 'report_detail' report.pk %}" class="btn btn-sm">View</a>
+                </div>
+                {% empty %}
+                <p>No reports yet. <a href="{% url 'report_create' %}">Create your first report</a></p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="dashboard-section">
+            <h2>My Adoption Requests</h2>
+            <div class="adoption-requests">
+                {% for request in user_adoption_requests %}
+                <div class="request-card">
+                    <h3>{{ request.animal.name }}</h3>
+                    <p><strong>Shelter:</strong> {{ request.animal.shelter.name|default:"N/A" }}</p>
+                    <p><strong>Status:</strong> <span class="badge badge-{{ request.status }}">{{ request.get_status_display }}</span></p>
+                    <a href="{% url 'animal_detail' request.animal.pk %}" class="btn btn-sm">View Animal</a>
+                </div>
+                {% empty %}
+                <p>No adoption requests yet.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+

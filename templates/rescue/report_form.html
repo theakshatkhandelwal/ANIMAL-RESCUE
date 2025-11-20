@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Animal - Animal Rescue{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <h1>{{ title|default:"Report Animal" }}</h1>
+        <form method="post" enctype="multipart/form-data" class="form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.report_type.id_for_label }}">Report Type</label>
+                {{ form.report_type }}
+                {% if form.report_type.errors %}
+                    <div class="error">{{ form.report_type.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.animal_type.id_for_label }}">Animal Type</label>
+                {{ form.animal_type }}
+                {% if form.animal_type.errors %}
+                    <div class="error">{{ form.animal_type.errors }}</div>
+                {% endif %}
+                <small>Our AI will try to identify this automatically from the photo</small>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.description.id_for_label }}">Description</label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                    <div class="error">{{ form.description.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.location.id_for_label }}">Location/Address</label>
+                    {{ form.location }}
+                    {% if form.location.errors %}
+                        <div class="error">{{ form.location.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.city.id_for_label }}">City</label>
+                    {{ form.city }}
+                    {% if form.city.errors %}
+                        <div class="error">{{ form.city.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.state.id_for_label }}">State</label>
+                    {{ form.state }}
+                    {% if form.state.errors %}
+                        <div class="error">{{ form.state.errors }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.zip_code.id_for_label }}">ZIP Code</label>
+                    <div class="input-with-button">
+                        {{ form.zip_code }}
+                        <button type="button" id="fetchLocationBtn" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-map-marker-alt"></i> Fetch Location
+                        </button>
+                    </div>
+                    {% if form.zip_code.errors %}
+                        <div class="error">{{ form.zip_code.errors }}</div>
+                    {% endif %}
+                    <small id="locationStatus"></small>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.photo.id_for_label }}">Photo</label>
+                <div class="photo-upload-container">
+                    <div class="file-input-wrapper">
+                        {{ form.photo }}
+                        <button type="button" id="cameraBtn" class="btn btn-sm btn-secondary camera-btn">
+                            <i class="fas fa-camera"></i> Camera
+                        </button>
+                    </div>
+                    <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;">
+                </div>
+                {% if form.photo.errors %}
+                    <div class="error">{{ form.photo.errors }}</div>
+                {% endif %}
+                <small>Upload a photo for AI recognition</small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Submit Report</button>
+                <a href="{% url 'report_list' %}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Fetch Location functionality
+document.getElementById('fetchLocationBtn').addEventListener('click', function() {
+    const statusEl = document.getElementById('locationStatus');
+    const btn = this;
+    
+    if (!navigator.geolocation) {
+        statusEl.textContent = 'Geolocation is not supported by your browser';
+        statusEl.style.color = 'var(--danger-color)';
+        return;
+    }
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching...';
+    statusEl.textContent = 'Getting your location...';
+    statusEl.style.color = 'var(--primary-color)';
+    
+    navigator.geolocation.getCurrentPosition(
+        function(position) {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
+            
+            // Use reverse geocoding API (Nominatim - free, no API key needed)
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`)
+                .then(response => response.json())
+                .then(data => {
+                    const address = data.address || {};
+                    
+                    // Fill location fields
+                    document.getElementById('id_location').value = 
+                        [address.road, address.house_number].filter(Boolean).join(' ') || 
+                        address.suburb || 
+                        address.neighbourhood || 
+                        '';
+                    
+                    document.getElementById('id_city').value = 
+                        address.city || 
+                        address.town || 
+                        address.village || 
+                        address.municipality || 
+                        '';
+                    
+                    document.getElementById('id_state').value = 
+                        address.state || 
+                        address.region || 
+                        '';
+                    
+                    document.getElementById('id_zip_code').value = 
+                        address.postcode || 
+                        '';
+                    
+                    statusEl.textContent = 'Location fetched successfully!';
+                    statusEl.style.color = 'var(--secondary-color)';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Fetch Location';
+                })
+                .catch(error => {
+                    console.error('Geocoding error:', error);
+                    statusEl.textContent = 'Error fetching address. Please enter manually.';
+                    statusEl.style.color = 'var(--danger-color)';
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Fetch Location';
+                });
+        },
+        function(error) {
+            let errorMsg = 'Error getting location: ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMsg += 'Permission denied. Please enable location access.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMsg += 'Location unavailable.';
+                    break;
+                case error.TIMEOUT:
+                    errorMsg += 'Request timeout.';
+                    break;
+                default:
+                    errorMsg += 'Unknown error.';
+                    break;
+            }
+            statusEl.textContent = errorMsg;
+            statusEl.style.color = 'var(--danger-color)';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-map-marker-alt"></i> Fetch Location';
+        }
+    );
+});
+
+// Camera functionality
+document.getElementById('cameraBtn').addEventListener('click', function() {
+    document.getElementById('cameraInput').click();
+});
+
+document.getElementById('cameraInput').addEventListener('change', function(e) {
+    if (e.target.files && e.target.files[0]) {
+        // Transfer the file to the main photo input
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(e.target.files[0]);
+        document.getElementById('id_photo').files = dataTransfer.files;
+        
+        // Trigger change event to show preview
+        const event = new Event('change', { bubbles: true });
+        document.getElementById('id_photo').dispatchEvent(event);
+    }
+});
+</script>
+{% endblock %}
+
+

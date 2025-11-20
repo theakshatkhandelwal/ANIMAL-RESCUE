@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Adoption Request - Animal Rescue{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <h1>Adoption Request for {{ animal.name }}</h1>
+        <div class="animal-preview">
+            {% if animal.photo %}
+                <img src="{{ animal.photo.url }}" alt="{{ animal.name }}">
+            {% endif %}
+            <p><strong>{{ animal.get_animal_type_display }}</strong> - {{ animal.breed|default:"Mixed breed" }}</p>
+        </div>
+        <form method="post" class="form">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.message.id_for_label }}">Why would you like to adopt {{ animal.name }}?</label>
+                {{ form.message }}
+                {% if form.message.errors %}
+                    <div class="error">{{ form.message.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Submit Request</button>
+                <a href="{% url 'animal_detail' animal.pk %}" class="btn btn-outline">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+

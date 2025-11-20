@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Report Details - Animal Rescue{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="report-detail">
+        <div class="report-detail-image">
+            {% if report.photo %}
+                <img src="{{ report.photo.url }}" alt="Report photo">
+            {% else %}
+                <div class="no-image large">
+                    <i class="fas fa-image"></i>
+                </div>
+            {% endif %}
+        </div>
+        <div class="report-detail-info">
+            <span class="badge badge-{{ report.report_type }}">{{ report.get_report_type_display }}</span>
+            <h1>{{ report.get_animal_type_display }}</h1>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>Location:</strong> {{ report.location }}, {{ report.city }}, {{ report.state }} {{ report.zip_code }}
+                </div>
+                <div class="info-item">
+                    <strong>Reported by:</strong> {{ report.reported_by.username }}
+                </div>
+                <div class="info-item">
+                    <strong>Date:</strong> {{ report.created_at|date:"F d, Y" }}
+                </div>
+                <div class="info-item">
+                    <strong>Status:</strong> <span class="badge badge-{{ report.status }}">{{ report.get_status_display }}</span>
+                </div>
+                {% if report.ai_identified_type %}
+                <div class="info-item ai-highlight">
+                    <strong><i class="fas fa-robot"></i> AI Identification:</strong> 
+                    {{ report.ai_identified_type }}
+                    {% if report.ai_confidence %}
+                        ({{ report.ai_confidence|floatformat:0 }}% confidence)
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="description">
+                <h3>Description</h3>
+                <p>{{ report.description }}</p>
+            </div>
+        </div>
+    </div>
+
+    {% if updates %}
+    <section class="updates-section">
+        <h2>Updates</h2>
+        {% for update in updates %}
+        <div class="update-card">
+            <h3>{{ update.title }}</h3>
+            <p>{{ update.content }}</p>
+            <small>{{ update.created_at|date:"M d, Y" }} by {{ update.created_by.username }}</small>
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+

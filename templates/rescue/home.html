@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <h1>Welcome to Animal Rescue & Adoption</h1>
+        <p class="hero-subtitle">Connecting animals in need with loving homes</p>
+        <div class="hero-buttons">
+            <a href="{% url 'animal_list' %}" class="btn btn-primary">Find a Pet</a>
+            <a href="{% url 'report_create' %}" class="btn btn-secondary">Report Animal</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <section class="featured-section">
+        <h2 class="section-title">Available for Adoption</h2>
+        <div class="animal-grid">
+            {% for animal in featured_animals %}
+            <div class="animal-card">
+                {% if animal.photo %}
+                    <img src="{{ animal.photo.url }}" alt="{{ animal.name }}">
+                {% else %}
+                    <div class="no-image">
+                        <i class="fas fa-image"></i>
+                    </div>
+                {% endif %}
+                <div class="animal-card-content">
+                    <h3>{{ animal.name }}</h3>
+                    <p class="animal-type">{{ animal.get_animal_type_display }}</p>
+                    <p class="animal-breed">{{ animal.breed|default:"Mixed breed" }}</p>
+                    <a href="{% url 'animal_detail' animal.pk %}" class="btn btn-sm">View Details</a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="no-results">No animals available at the moment.</p>
+            {% endfor %}
+        </div>
+        <div class="text-center">
+            <a href="{% url 'animal_list' %}" class="btn btn-outline">View All Animals</a>
+        </div>
+    </section>
+
+    <section class="reports-section">
+        <h2 class="section-title">Recent Reports</h2>
+        <div class="report-grid">
+            {% for report in recent_reports %}
+            <div class="report-card">
+                {% if report.photo %}
+                    <img src="{{ report.photo.url }}" alt="Report photo">
+                {% else %}
+                    <div class="no-image">
+                        <i class="fas fa-image"></i>
+                    </div>
+                {% endif %}
+                <div class="report-card-content">
+                    <span class="badge badge-{{ report.report_type }}">{{ report.get_report_type_display }}</span>
+                    <h3>{{ report.get_animal_type_display }}</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> {{ report.location }}, {{ report.city }}</p>
+                    <p class="report-date">{{ report.created_at|date:"M d, Y" }}</p>
+                    <a href="{% url 'report_detail' report.pk %}" class="btn btn-sm">View Report</a>
+                </div>
+            </div>
+            {% empty %}
+            <p class="no-results">No recent reports.</p>
+            {% endfor %}
+        </div>
+        <div class="text-center">
+            <a href="{% url 'report_list' %}" class="btn btn-outline">View All Reports</a>
+        </div>
+    </section>
+
+    <section class="features-section">
+        <h2 class="section-title">How It Works</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-search"></i>
+                <h3>Search & Browse</h3>
+                <p>Browse through available animals and find your perfect companion</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-camera"></i>
+                <h3>AI Recognition</h3>
+                <p>Upload photos and our AI helps identify animals automatically</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-map-marked-alt"></i>
+                <h3>Location-Based</h3>
+                <p>Find animals and reports near you with location tracking</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-heart"></i>
+                <h3>Adopt & Save</h3>
+                <p>Connect with shelters and give animals a loving home</p>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+

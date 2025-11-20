@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ animal.name }} - Animal Rescue{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="animal-detail">
+        <div class="animal-detail-image">
+            {% if animal.photo %}
+                <img src="{{ animal.photo.url }}" alt="{{ animal.name }}">
+            {% else %}
+                <div class="no-image large">
+                    <i class="fas fa-image"></i>
+                </div>
+            {% endif %}
+        </div>
+        <div class="animal-detail-info">
+            <h1>{{ animal.name }}</h1>
+            <div class="animal-meta">
+                <span class="badge badge-primary">{{ animal.get_animal_type_display }}</span>
+                <span class="badge badge-{{ animal.status }}">{{ animal.get_status_display }}</span>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>Breed:</strong> {{ animal.breed|default:"Mixed breed" }}
+                </div>
+                {% if animal.age %}
+                <div class="info-item">
+                    <strong>Age:</strong> {{ animal.age }} years
+                </div>
+                {% endif %}
+                <div class="info-item">
+                    <strong>Gender:</strong> {{ animal.get_gender_display }}
+                </div>
+                {% if animal.color %}
+                <div class="info-item">
+                    <strong>Color:</strong> {{ animal.color }}
+                </div>
+                {% endif %}
+                {% if animal.size %}
+                <div class="info-item">
+                    <strong>Size:</strong> {{ animal.get_size_display }}
+                </div>
+                {% endif %}
+                {% if animal.shelter %}
+                <div class="info-item shelter-info">
+                    <strong><i class="fas fa-building"></i> Shelter/NGO:</strong> 
+                    <a href="{% url 'dashboard' %}">{{ animal.shelter.name }}</a>
+                    <br>
+                    <small>
+                        <i class="fas fa-map-marker-alt"></i> {{ animal.shelter.city }}, {{ animal.shelter.state }}
+                        {% if animal.shelter.phone %}
+                            <br><i class="fas fa-phone"></i> {{ animal.shelter.phone }}
+                        {% endif %}
+                        {% if animal.shelter.email %}
+                            <br><i class="fas fa-envelope"></i> {{ animal.shelter.email }}
+                        {% endif %}
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="description">
+                <h3>Description</h3>
+                <p>{{ animal.description }}</p>
+            </div>
+
+            {% if animal.status == 'available' and user.is_authenticated %}
+                {% if not adoption_request %}
+                    <a href="{% url 'adoption_request_create' animal.pk %}" class="btn btn-primary btn-lg">Request Adoption</a>
+                {% else %}
+                    <div class="alert alert-info">
+                        <p>You have a {{ adoption_request.get_status_display }} adoption request for this animal.</p>
+                    </div>
+                {% endif %}
+            {% elif animal.status == 'available' %}
+                <a href="{% url 'login' %}" class="btn btn-primary btn-lg">Login to Adopt</a>
+            {% endif %}
+
+            {% if user.is_authenticated and hasattr user 'shelter' and animal.shelter == user.shelter %}
+                <div class="admin-actions">
+                    <a href="{% url 'animal_edit' animal.pk %}" class="btn btn-outline">Edit Animal</a>
+                    <a href="{% url 'update_create_animal' animal.pk %}" class="btn btn-outline">Add Update</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if animal.updates.exists %}
+    <section class="updates-section">
+        <h2>Updates</h2>
+        {% for update in animal.updates.all %}
+        <div class="update-card">
+            <h3>{{ update.title }}</h3>
+            <p>{{ update.content }}</p>
+            <small>{{ update.created_at|date:"M d, Y" }} by {{ update.created_by.username }}</small>
+        </div>
+        {% endfor %}
+    </section>
+    {% endif %}
+</div>
+{% endblock %}
+
+
