@@ -4,19 +4,33 @@ import sys
 from pathlib import Path
 from io import BytesIO
 
-# Add project root to path
-project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root))
+# Add project root to path - wrap in try/except to avoid crashes
+try:
+    project_root = Path(__file__).parent.parent
+    sys.path.insert(0, str(project_root))
+except Exception:
+    pass  # Continue even if path setup fails
 
 # Set Django settings module
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'animal_rescue.settings')
+try:
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'animal_rescue.settings')
+except Exception:
+    pass  # Continue even if env var setup fails
 
 # Cache for WSGI application (lazy loading)
 _wsgi_app_cache = None
 
 def get_wsgi_app():
     """Lazy load WSGI application"""
-    global _wsgi_app_cache
+    global _wsgi_app_cache, _import_success, _import_error, _import_traceback
+    
+    # If imports failed at module level, return that error
+    if not _import_success:
+        return {
+            'error': f'Module import failed: {_import_error}',
+            'traceback': _import_traceback
+        }
+    
     if _wsgi_app_cache is None:
         try:
             import django
