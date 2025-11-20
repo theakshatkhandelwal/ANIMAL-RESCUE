@@ -770,6 +770,8 @@ body {
 .password-input-wrapper .form-control {
     padding-right: 50px;
     flex: 1;
+    width: 100%;
+    min-width: 0; /* Prevents flex item from overflowing */
 }
 
 .password-toggle {
