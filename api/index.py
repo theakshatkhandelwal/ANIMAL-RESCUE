@@ -11,24 +11,25 @@ sys.path.insert(0, str(project_root))
 # Set Django settings module
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'animal_rescue.settings')
 
-# Store setup state
-wsgi_application = None
-setup_error = None
-setup_traceback = None
+# Cache for WSGI application (lazy loading)
+_wsgi_app_cache = None
 
-# Initialize Django application - wrap in try/except to catch all errors
-try:
-    import django
-    django.setup()
-    
-    from django.core.wsgi import get_wsgi_application
-    wsgi_application = get_wsgi_application()
-    
-except Exception as e:
-    import traceback
-    setup_error = str(e)
-    setup_traceback = traceback.format_exc()
-    wsgi_application = None
+def get_wsgi_app():
+    """Lazy load WSGI application"""
+    global _wsgi_app_cache
+    if _wsgi_app_cache is None:
+        try:
+            import django
+            django.setup()
+            from django.core.wsgi import get_wsgi_application
+            _wsgi_app_cache = get_wsgi_application()
+        except Exception as e:
+            import traceback
+            _wsgi_app_cache = {
+                'error': str(e),
+                'traceback': traceback.format_exc()
+            }
+    return _wsgi_app_cache
 
 # Vercel handler function
 def handler(request):
@@ -36,17 +37,20 @@ def handler(request):
     Vercel serverless function handler for Django
     This function will show detailed errors if something fails
     """
+    # Get WSGI application (lazy loaded)
+    wsgi_app_result = get_wsgi_app()
+    
     # If Django setup failed, return detailed error
-    if wsgi_application is None:
+    if isinstance(wsgi_app_result, dict) and 'error' in wsgi_app_result:
         error_html = f"""
         <html>
         <head><title>Django Setup Error</title></head>
         <body style="font-family: monospace; padding: 20px; background: #f5f5f5;">
             <h1 style="color: #d32f2f;">Django Setup Failed</h1>
             <h2>Error:</h2>
-            <pre style="background: white; padding: 15px; border: 1px solid #ddd; overflow-x: auto;">{setup_error}</pre>
+            <pre style="background: white; padding: 15px; border: 1px solid #ddd; overflow-x: auto;">{wsgi_app_result['error']}</pre>
             <h2>Full Traceback:</h2>
-            <pre style="background: white; padding: 15px; border: 1px solid #ddd; overflow-x: auto; white-space: pre-wrap;">{setup_traceback}</pre>
+            <pre style="background: white; padding: 15px; border: 1px solid #ddd; overflow-x: auto; white-space: pre-wrap;">{wsgi_app_result['traceback']}</pre>
             <h2>Environment Variables Check:</h2>
             <ul>
                 <li>DATABASE_URL: {'SET' if os.environ.get('DATABASE_URL') else '<strong style="color: red;">NOT SET</strong>'}</li>
@@ -62,6 +66,8 @@ def handler(request):
             'headers': {'Content-Type': 'text/html; charset=utf-8'},
             'body': error_html
         }
+    
+    wsgi_application = wsgi_app_result
     
     try:
         # Extract request data - handle different request formats
