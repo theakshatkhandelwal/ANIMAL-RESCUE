@@ -11,6 +11,10 @@
   ],
   "routes": [
     {
+      "src": "/test",
+      "dest": "api/simple.py"
+    },
+    {
       "src": "/static/(.*)",
       "dest": "/static/$1"
     },
