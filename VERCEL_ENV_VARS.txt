@@ -1,0 +1,12 @@
+Copy these environment variables to Vercel:
+
+DATABASE_URL=postgresql://neondb_owner:npg_Xm6ksJTFyIA3@ep-red-pine-ah2qenfa-pooler.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+
+SECRET_KEY=8y3UjX18Ejly__IAEz4WCkxoWjYTbxRcYPrIsofPvFEWANdRZjIAWqqcMQCxL01ULfI
+
+DEBUG=False
+
+ALLOWED_HOSTS=*.vercel.app
+
+Note: After deployment, update ALLOWED_HOSTS with your actual Vercel domain (e.g., animal-rescue-adoption-xxxxx.vercel.app)
+
