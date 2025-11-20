@@ -37,6 +37,10 @@ def handler(request):
     Vercel serverless function handler for Django
     This function will show detailed errors if something fails
     """
+    # First, try to understand what type of request object we have
+    request_type = type(request).__name__
+    request_repr = str(request)[:200] if request else 'None'
+    
     # Get WSGI application (lazy loaded)
     wsgi_app_result = get_wsgi_app()
     
@@ -58,6 +62,11 @@ def handler(request):
                 <li>DEBUG: {os.environ.get('DEBUG', 'Not set')}</li>
                 <li>ALLOWED_HOSTS: {os.environ.get('ALLOWED_HOSTS', 'Not set')}</li>
             </ul>
+            <h2>Request Info:</h2>
+            <ul>
+                <li>Request Type: {request_type}</li>
+                <li>Request: {request_repr}</li>
+            </ul>
         </body>
         </html>
         """
@@ -70,41 +79,43 @@ def handler(request):
     wsgi_application = wsgi_app_result
     
     try:
-        # Extract request data - handle different request formats
+        # Try multiple ways to extract request data
+        # Method 1: Vercel Request object (has attributes)
         if hasattr(request, 'method'):
             method = request.method
+            path = getattr(request, 'path', '/')
+            query_string = getattr(request, 'query_string', '') or ''
+            headers_dict = getattr(request, 'headers', {}) or {}
+            body_bytes = getattr(request, 'body', b'') or b''
+        
+        # Method 2: Dictionary format
         elif isinstance(request, dict):
             method = request.get('method', 'GET')
-        else:
-            method = 'GET'
-        
-        if hasattr(request, 'path'):
-            path = request.path
-        elif isinstance(request, dict):
-            path = request.get('path', '/')
-        else:
-            path = '/'
-        
-        if hasattr(request, 'query_string'):
-            query_string = request.query_string or ''
-        elif isinstance(request, dict):
-            query_string = request.get('query_string', '') or ''
-        else:
-            query_string = ''
-        
-        if hasattr(request, 'headers'):
-            headers_dict = request.headers
-        elif isinstance(request, dict):
-            headers_dict = request.get('headers', {})
-        else:
-            headers_dict = {}
-        
-        if hasattr(request, 'body'):
-            body_bytes = request.body or b''
-        elif isinstance(request, dict):
+            path = request.get('path', request.get('url', '/'))
+            query_string = request.get('query_string', request.get('query', '')) or ''
+            headers_dict = request.get('headers', {}) or {}
             body_bytes = request.get('body', b'') or b''
+            if isinstance(body_bytes, str):
+                body_bytes = body_bytes.encode('utf-8')
+        
+        # Method 3: Try to get from request object attributes
         else:
-            body_bytes = b''
+            # Try common attribute names
+            method = getattr(request, 'method', getattr(request, 'httpMethod', 'GET'))
+            path = getattr(request, 'path', getattr(request, 'pathname', '/'))
+            query_string = getattr(request, 'query_string', getattr(request, 'queryString', '')) or ''
+            headers_dict = getattr(request, 'headers', {}) or {}
+            body_bytes = getattr(request, 'body', getattr(request, 'rawBody', b'')) or b''
+            if isinstance(body_bytes, str):
+                body_bytes = body_bytes.encode('utf-8')
+        
+        # If path is a full URL, extract just the path
+        if path.startswith('http'):
+            from urllib.parse import urlparse
+            parsed = urlparse(path)
+            path = parsed.path
+            if not query_string and parsed.query:
+                query_string = parsed.query
         
         # Build WSGI environment
         host = headers_dict.get('host', 'localhost')
