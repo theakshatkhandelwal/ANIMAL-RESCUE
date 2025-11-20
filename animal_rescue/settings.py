@@ -105,6 +105,8 @@ if DATABASE_URL:
             'OPTIONS': {
                 'sslmode': 'require',
             },
+            # Connection timeout settings for Render
+            'CONN_MAX_AGE': 0,  # Don't persist connections (Render handles this)
             # Connection settings for Neon
             'CONN_MAX_AGE': 600,  # Keep connections alive for 10 minutes
         }
