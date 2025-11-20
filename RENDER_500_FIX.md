@@ -1,8 +1,27 @@
 # 🔧 Fix 500 Server Error on Render
 
-## Common Causes of 500 Error
+## Step 1: Run Diagnostic Script
 
-### 1. Database Migrations Not Run (MOST LIKELY!)
+First, let's see what's wrong:
+
+1. Go to Render Dashboard → Your Web Service
+2. Click **"Shell"** tab
+3. Run:
+   ```bash
+   python check_deployment.py
+   ```
+4. This will show you exactly what's wrong
+
+## Step 2: Fix Based on Diagnostic
+
+### If Database Connection Failed:
+1. Go to Render → Environment Variables
+2. Check `DATABASE_URL` is set
+3. Make sure PostgreSQL database is "Available" (not paused)
+4. Copy the Internal Database URL from PostgreSQL service
+5. Set it in Web Service → Environment → `DATABASE_URL`
+
+### If Migrations Not Run (MOST COMMON!):
 
 **Fix:**
 1. Go to Render Dashboard → Your Web Service
