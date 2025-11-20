@@ -1,11 +1,18 @@
 """
 AI Image Recognition Module for Animal Identification
 Uses PIL/Pillow for basic image processing (lightweight alternative to OpenCV)
-TensorFlow and OpenCV are optional and can be added later for advanced ML model support
+TensorFlow, OpenCV, and NumPy are optional and can be added later for advanced ML model support
 """
-import numpy as np
 import os
 from PIL import Image, ImageStat
+
+# Optional NumPy import (only needed for advanced ML processing)
+try:
+    import numpy as np
+    NUMPY_AVAILABLE = True
+except ImportError:
+    NUMPY_AVAILABLE = False
+    np = None
 
 # Optional OpenCV import (for advanced image processing)
 try:
@@ -57,11 +64,14 @@ class AnimalRecognizer:
             img = Image.open(image_path)
             img = img.convert('RGB')
             img = img.resize((224, 224))
-            # Use numpy instead of tensorflow.keras.preprocessing
-            img_array = np.array(img)
-            img_array = np.expand_dims(img_array, axis=0)
-            img_array = img_array / 255.0
-            return img_array
+            # Use numpy if available, otherwise return PIL Image
+            if NUMPY_AVAILABLE and np:
+                img_array = np.array(img)
+                img_array = np.expand_dims(img_array, axis=0)
+                img_array = img_array / 255.0
+                return img_array
+            # Fallback: return PIL Image (for basic processing)
+            return img
         except Exception as e:
             print(f"Image preprocessing error: {e}")
             return None
@@ -76,9 +86,9 @@ class AnimalRecognizer:
         
         try:
             # Use TensorFlow model if available
-            if self.model and TENSORFLOW_AVAILABLE:
+            if self.model and TENSORFLOW_AVAILABLE and NUMPY_AVAILABLE:
                 processed_img = self.preprocess_image(image_path)
-                if processed_img is not None:
+                if processed_img is not None and NUMPY_AVAILABLE and np:
                     predictions = self.model.predict(processed_img, verbose=0)
                     class_idx = np.argmax(predictions[0])
                     confidence = float(predictions[0][class_idx])
@@ -147,7 +157,10 @@ class AnimalRecognizer:
                     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
                     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
                     hist = cv2.calcHist([hsv], [0], None, [180], [0, 180])
-                    dominant_hue = np.argmax(hist)
+                    if NUMPY_AVAILABLE and np:
+                        dominant_hue = np.argmax(hist)
+                    else:
+                        dominant_hue = max(range(len(hist)), key=lambda i: hist[i])
                     height, width = img.shape[:2]
                     features['size_estimate'] = 'large' if height * width > 500000 else 'small'
                     return features
